@@ -23,10 +23,11 @@ app.use(cors());
 
 const PORT = 3000
 
-app.use(function (req, res, next) {
-    console.log('Time:', Date.now());
-    next();
-});
+app.use((req, res, next) => {
+  console.log('Time:', Date.now());
+  next();
+}, express.json(), express.urlencoded({ extended: true }));
+
 
 app.post('/', function (req, res) {
     console.log(req.body);
@@ -44,11 +45,8 @@ app.get('/quiz', function (req, res) {
     });
 });
 
-// Create
+// Create fake 
 app.get('/quizz', function (req, res) {
-  // const { question, answer } = req?.body;
-
-  // const newQuiz = new Quiz({ question, answer });
 
   const newQuiz = new Quiz({
     nom: "Quiz 3",
@@ -78,6 +76,32 @@ app.get('/quizz', function (req, res) {
       res.status(500).send('Error saving quiz');
     });
 }); 
+
+// Create true
+app.post('/create', function (req, res) {
+  const create = req.body; 
+  console.log('create', create);
+
+  const { name, rounds, categories } = req.body;
+  console.log('rounds', rounds);
+
+  const newQuiz = new Quiz({
+    name: name,
+    rounds:rounds,
+    categories:categories
+  });
+  
+  newQuiz.save()
+    .then((savedQuiz) => {
+      console.log('Quiz saved:', savedQuiz);
+      res.send('Quiz saved');
+    })
+    .catch((error) => {
+      console.error('Error saving quiz:', error);
+      res.status(500).send('Error saving quiz');
+    });
+
+})
 
 app.put('/quiz/:id', function (req, res) {
   const quizId = req.params.id;

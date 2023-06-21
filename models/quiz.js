@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const quizSchema = new mongoose.Schema({
-    nom: String,
+    name: String,
     rounds: [{
         // questions: String, required: true, unique: true,
         questions: String,
@@ -12,4 +12,3 @@ const quizSchema = new mongoose.Schema({
 })
 
 module.exports = mongoose.model("Quiz", quizSchema) || mongoose.models("Quiz", quizSchema)
-// module.exports = mongoose.model("Quiz", quizSchema)
