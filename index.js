@@ -1,6 +1,7 @@
-const express = require('express')
+const express = require('express');
 const mongoose = require('mongoose');
 const Quiz = require('./models/quiz');
+const User = require('./models/userModel');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -45,20 +46,38 @@ app.get('/quiz', function (req, res) {
     });
 });
 
+// Create User fake
+app.get("/user", function (req, res) {
+  const newUser = new User({
+    email: "johndoe@example.com",
+    password: "password123",
+  });
+
+  newUser.save()
+    .then((savedUser) => {
+      console.log("User saved:", savedUser);
+      res.send("User saved");
+    })
+    .catch((error) => {
+      console.error("Error saving user:", error);
+      res.status(500).send("Error saving user");
+    });
+});
+
 // Create fake 
 app.get('/quizz', function (req, res) {
 
   const newQuiz = new Quiz({
-    nom: "Quiz 3",
+    name: "Nom d'oiseaux",
     rounds: [
       {
-        questions: "Question 1",
-        reponses: ["Answer 1", "Answer 2"],
+        questions: "Piou piou est un nom d'oiseau ?",
+        reponses: ["Oui", "Non"],
         corrects: [1]
       },
       {
-        questions: "Question 2",
-        reponses: ["Answer 3", "Answer 4"],
+        questions: "Médor est un nom d'oiseau ?",
+        reponses: ["Oui", "Non"],
         corrects: [0]
       }
     ],
@@ -123,6 +142,7 @@ app.put('/quiz/:id', function (req, res) {
 
 app.delete('/quiz/:id', function (req, res) {
   const quizId = req.params.id;
+  console.log('quizID', quizId);
 
   Quiz.findByIdAndDelete(quizId)
     .then((deletedQuiz) => {
@@ -137,6 +157,135 @@ app.delete('/quiz/:id', function (req, res) {
       res.status(500).send('Error deleting quiz');
     });
 });
+
+// Login route
+app.post("/login", async (req, res) => {
+  try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email });
+      console.log('user', user);
+      if (!user) {
+          return res.status(401).json({ error: "Invalid email or password" });
+      }
+      const isPasswordValid = await user.comparePassword(password);
+      console.log('isPasswordValid', isPasswordValid);
+      if (!isPasswordValid) {
+          return res.status(401).json({ error: "Invalid email or password" });
+      }
+      const token = user.generateToken();
+      console.log('token', token);
+      res.json({ token });
+  } catch (error) {
+      res.status(500).json({ error: "Login failed" });
+  }
+});
+
+app.post("/register", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = new User({ email, password });
+    await user.save();
+    const token = await user.generateToken(); // Generate and save the token
+    res.status(201).json({ message: "Registration successful", token });
+  } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error (email already exists)
+      res.status(400).json({ error: "Email already exists" });
+    } else {
+      // Other error
+      res.status(500).json({ error: "Registration failed" });
+    }
+  }
+});
+
+// app.post("/register", async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = new User({ email, password });
+//     await user.save();
+//     const token = await user.generateToken(); // Generate the token
+//     res.status(201).json({ message: "Registration successful" });
+//     // Save the email and token in local storage
+//     localStorage.setItem("email", email);
+//     localStorage.setItem("token", token);
+//   } catch (error) {
+//     if (error.code === 11000) {
+//       // Duplicate key error (email already exists)
+//       res.status(400).json({ error: "Email already exists" });
+//     } else {
+//       // Other error
+//       res.status(500).json({ error: "Registration failed" });
+//     }
+//   }
+// });
+
+// app.post("/register", async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = new User({ email, password });
+//     await user.save();
+//     const token = await user.generateToken(); // Generate the token
+    
+//     // Calculate expiration time (2 hours from now)
+//     const expirationTime = new Date();
+//     expirationTime.setTime(expirationTime.getTime() + 2 * 60 * 60 * 1000);
+
+//     res.status(201).json({ message: "Registration successful" });
+
+//     // Save the email, token, and expiration time in local storage
+//     localStorage.setItem("email", email);
+//     localStorage.setItem("token", token);
+//     localStorage.setItem("expirationTime", expirationTime.getTime());
+//   } catch (error) {
+//     if (error.code === 11000) {
+//       // Duplicate key error (email already exists)
+//       res.status(400).json({ error: "Email already exists" });
+//     } else {
+//       // Other error
+//       res.status(500).json({ error: "Registration failed" });
+//     }
+//   }
+// });
+
+// app.post("/register", async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = new User({ email, password });
+//     await user.save();
+//     const token = await user.generateToken(); // Generate the token
+    
+//     // Calculate expiration time (2 hours from now)
+//     const expirationTime = new Date();
+//     expirationTime.setTime(expirationTime.getTime() + 2 * 60 * 60 * 1000);
+
+//     // Save the email, token, and expiration time in local storage
+//     localStorage.setItem("email", email);
+//     localStorage.setItem("token", token);
+//     localStorage.setItem("expirationTime", expirationTime.getTime());
+
+//     res.status(201).json({ message: "Registration successful" });
+//   } catch (error) {
+//     if (error.code === 11000) {
+//       // Duplicate key error (email already exists)
+//       return res.status(400).json({ error: "Email already exists" });
+//     } else {
+//       // Other error
+//       return res.status(500).json({ error: "Registration failed" });
+//     }
+//   }
+// });
+
+
+// Function to check if the token has expired
+function isTokenExpired() {
+  const expirationTime = localStorage.getItem("expirationTime");
+  if (!expirationTime) {
+    return true; // Expiration time not found
+  }
+  const currentTime = new Date().getTime();
+  return currentTime > parseInt(expirationTime);
+}
+
 
 
 app.listen(PORT)  
