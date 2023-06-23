@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 }, express.json(), express.urlencoded({ extended: true }));
 
 
-app.post('/', function (req, res) {
+app.get('/', function (req, res) {
     console.log(req.body);
     res.send('hello world');
   })
