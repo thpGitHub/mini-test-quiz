@@ -5,12 +5,13 @@ const User = require('./models/userModel');
 const cors = require('cors');
 require('dotenv').config();
 
+
 const mongoURI = process.env.mongoURI;
 
 mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 mongoose.connection.on('error', console.error.bind(console, 'Erreur de connexion à MongoDB :'));
 mongoose.connection.once('open', () => {
@@ -24,6 +25,7 @@ app.use(cors());
 
 // const PORT = 3000
 const PORT = process.env.PORT || 3000
+// const PORT = process.env.PORT || 2368
 
 app.use((req, res, next) => {
   console.log('Time:', Date.now());
@@ -69,17 +71,17 @@ app.get("/user", function (req, res) {
 app.get('/quizz', function (req, res) {
 
   const newQuiz = new Quiz({
-    name: "Nom d'oiseaux",
+    name: "Quelle est la Capitale",
     rounds: [
       {
-        questions: "Piou piou est un nom d'oiseau ?",
-        reponses: ["Oui", "Non"],
+        questions: "De l'Inde ?",
+        reponses: ["Calcutta", "New Delhi"],
         corrects: [1]
       },
       {
-        questions: "Médor est un nom d'oiseau ?",
-        reponses: ["Oui", "Non"],
-        corrects: [0]
+        questions: "Du Portugal ?",
+        reponses: ["Lisbonne", "Madrid"],
+        corrects: [1]
       }
     ],
     categories: ["Category 1", "Category 2"]
@@ -199,84 +201,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// app.post("/register", async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     const user = new User({ email, password });
-//     await user.save();
-//     const token = await user.generateToken(); // Generate the token
-//     res.status(201).json({ message: "Registration successful" });
-//     // Save the email and token in local storage
-//     localStorage.setItem("email", email);
-//     localStorage.setItem("token", token);
-//   } catch (error) {
-//     if (error.code === 11000) {
-//       // Duplicate key error (email already exists)
-//       res.status(400).json({ error: "Email already exists" });
-//     } else {
-//       // Other error
-//       res.status(500).json({ error: "Registration failed" });
-//     }
-//   }
-// });
-
-// app.post("/register", async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     const user = new User({ email, password });
-//     await user.save();
-//     const token = await user.generateToken(); // Generate the token
-    
-//     // Calculate expiration time (2 hours from now)
-//     const expirationTime = new Date();
-//     expirationTime.setTime(expirationTime.getTime() + 2 * 60 * 60 * 1000);
-
-//     res.status(201).json({ message: "Registration successful" });
-
-//     // Save the email, token, and expiration time in local storage
-//     localStorage.setItem("email", email);
-//     localStorage.setItem("token", token);
-//     localStorage.setItem("expirationTime", expirationTime.getTime());
-//   } catch (error) {
-//     if (error.code === 11000) {
-//       // Duplicate key error (email already exists)
-//       res.status(400).json({ error: "Email already exists" });
-//     } else {
-//       // Other error
-//       res.status(500).json({ error: "Registration failed" });
-//     }
-//   }
-// });
-
-// app.post("/register", async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     const user = new User({ email, password });
-//     await user.save();
-//     const token = await user.generateToken(); // Generate the token
-    
-//     // Calculate expiration time (2 hours from now)
-//     const expirationTime = new Date();
-//     expirationTime.setTime(expirationTime.getTime() + 2 * 60 * 60 * 1000);
-
-//     // Save the email, token, and expiration time in local storage
-//     localStorage.setItem("email", email);
-//     localStorage.setItem("token", token);
-//     localStorage.setItem("expirationTime", expirationTime.getTime());
-
-//     res.status(201).json({ message: "Registration successful" });
-//   } catch (error) {
-//     if (error.code === 11000) {
-//       // Duplicate key error (email already exists)
-//       return res.status(400).json({ error: "Email already exists" });
-//     } else {
-//       // Other error
-//       return res.status(500).json({ error: "Registration failed" });
-//     }
-//   }
-// });
-
-
 // Function to check if the token has expired
 function isTokenExpired() {
   const expirationTime = localStorage.getItem("expirationTime");
@@ -286,8 +210,6 @@ function isTokenExpired() {
   const currentTime = new Date().getTime();
   return currentTime > parseInt(expirationTime);
 }
-
-
 
 // app.listen(PORT)  
 app.listen(PORT, () => {
