@@ -6,7 +6,13 @@ const cors = require('cors');
 require('dotenv').config();
 
 
-const mongoURI = process.env.mongoURI;
+//const mongoURI = process.env.mongoURI;
+
+// with docker compose we can use the name of the service as the host name (mongo_data) and the port (27017)
+// const mongoURI = 'mongodb://mongo_data:27017/quiz_bdd_in_docker';
+// const mongoURI = 'mongodb://localhost:27017/quiz_bdd_in_docker';
+// const mongoURI = 'mongodb://127.0.0.1:27017/quiz_bdd_in_docker';
+const mongoURI = 'mongodb://mongo:27017/quiz_bdd_in_docker';
 
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,

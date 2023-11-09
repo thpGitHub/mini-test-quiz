@@ -12,3 +12,5 @@ const quizSchema = new mongoose.Schema({
 })
 
 module.exports = mongoose.model("Quiz", quizSchema) || mongoose.models("Quiz", quizSchema)
+// for Docker
+// module.exports = mongoose.model("quiz_bdd_in_docker", quizSchema) || mongoose.models("quiz_bdd_in_docker", quizSchema)
